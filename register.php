@@ -18,23 +18,17 @@ if(isset($_POST['submit'])){
    
 
 
-    if(mysqli_num_rows($select) > 0 ){
-        $message[] = 'user already  exist!';
-    }else{
-       mysqli_query($conn, "INSERT INTO  `users_form`(name, email, password) VALUES('$name', '$email', '$pass')") 
-       or die ('query failed');
-       $message[] = 'registered successfuly!';
-       header('location:login.php');
-       
-
-
-
+      if(mysqli_num_rows($select) > 0 ){
+         $message[] = 'user already  exist!';
+      }else{
+      mysqli_query($conn, "INSERT INTO  `users_form`(name, email, password) VALUES('$name', '$email', '$pass')") 
+        or die ('query failed');
+        $message[] = 'registered successfuly!';
+     header('location:login.php');
     
-    
-
   
-    }
-    }
+     }
+     }
 
 ?>
 
@@ -51,11 +45,11 @@ if(isset($_POST['submit'])){
 <body>
 <?php
 
-if(isset($message)){
+ if(isset($message)){
     foreach($message as $message){
-        echo '<div class="message" onclick="this.remove();">'.$message.'</div>'; 
+       echo '<div class="message" onclick="this.remove();">'.$message.'</div>'; 
     }
-}
+ }
 ?>
 
     <div class="form-container">

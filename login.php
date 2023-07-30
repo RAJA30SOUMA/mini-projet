@@ -46,11 +46,11 @@ if(isset($_POST['submit'])){
 <body>
 <?php
 
-if(isset($message)){
+ if(isset($message)){
     foreach($message as $message){
-        echo '<div class="message" onclick="this.remove();">'.$message.'</div>'; 
-    }
-}
+         echo '<div class="message" onclick="this.remove();">'.$message.'</div>'; 
+     }
+ }
 ?>
 
     <div class="form-container">
@@ -61,8 +61,8 @@ if(isset($message)){
         <input type="password" name="password" required placeholder= "entre password"
          class="box">
         
-        <input type="submit" name="submit" class="btn" value="login now">
-        <p>already have an account? <a href="register.php">register now</a></p>
+         <input type="submit" name="submit" class="btn" value="login now">
+        <p>already have an account? <a href="register.php">register now</a></p> 
         </form>
     </div>
 </body>

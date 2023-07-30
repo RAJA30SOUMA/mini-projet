@@ -20,23 +20,59 @@ if(isset($_GET['logout'])){
 
 
 if(isset($_POST['add_to_cart'])){
+
     $product_name = $_POST['product_name'];
     $product_price = $_POST['product_price'];
     $product_image = $_POST['product_image'];
     $product_quantity = $_POST['product_quantity'];
-    //  $select_product = mysqli_query() or die ('query failed');
+   
 
-    $select_user = mysqli_query($conn, "SELECT * FROM `users_form` WHERE id ='$user_id'")
- 
- or die ('query failed');
+  $select_cart = mysqli_query($conn,"SELECT * FROM  `cart` WHERE name = '$product_name'
+   AND user_id  = '$user_id'") or die('query failed');
 
+  
+  if(mysqli_num_rows($select_cart) > 0){
+    $message[] = 'product aleredy ';
+    
+    // if(mysql-num-rows($select_cart>0 ))
 
+    // if mysql-num_row(select>)($select_cart-mysql)
+    // if memory_get_usage(select-$select_cart-product-$select_cart;$select_user;)
+  }else{
 
+    mysqli_query($conn, "INSERT INTO  `cart`(user_id, name, price, image, quantity) VALUES
+     ('$user_id', '$product_name', '$product_price','$product_image','$product_quantity')") or die ('query failed');
 
+     $message[] = 'product  added to cart!';
+  }
+  
+
+};
+
+if(isset($_POST['update_cart'])){
+  $update_quantity = $_POST['cart_quantity'];
+  $update_id = $_POST['cart_id'];
+  mysqli_query($conn, "UPDATE  `cart` SET quantity = '$update_quantity' WHERE id = ' $update_id'") or die ('query failed');
+  $message[] = 'cart quantity updated successfully!';
 }
 
-?>
+if(isset($_GET['remove'])){
+  
+  $remove_id = $_GET['remove'];
+  
+  mysqli_query($conn, "DELETE FROM  `cart` WHERE id = '$remove_id'") or die('query failed');
+  header('location:index.php');
+}
 
+
+if(isset($_GET['delete_all'])){
+  mysqli_query($conn, "DELETE FROM  `cart` WHERE user_id = '$user_id'") or die ('query failed');
+  header('location:index.php');
+}
+
+
+
+?>
 
 
 <!DOCTYPE html>
@@ -50,6 +86,7 @@ if(isset($_POST['add_to_cart'])){
     <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     
    <link rel="stylesheet" href=" https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/all.min.css"> -->
+
 </head>
 <body>
 
@@ -67,7 +104,7 @@ if(isset($_POST['add_to_cart'])){
     $fetch_user = mysqli_fetch_assoc($select_user);
  };
 
-
+      
  
  ?>
 
@@ -90,18 +127,17 @@ if(isset($_POST['add_to_cart'])){
 
 <div class="products">
 
-<h1 class="heading">latest products</h1>
+<h1 class="heading"> Products</h1>
 
 <div class="box-container">
 
-<?php
+     <?php
+     $select_product= mysqli_query($conn, "SELECT * FROM `products`")  or die ('query
+     failed');
+     if(mysqli_num_rows($select_product) > 0){
+       while($fetch_product = mysqli_fetch_assoc($select_product)){
+     ?>
 
-$select_product= mysqli_query($conn, "SELECT * FROM `products`")  or die ('query
- failed');
-
-if(mysqli_num_rows($select_product) > 0){
-    while($fetch_product = mysqli_fetch_assoc($select_product)){
-        ?>
         <form method="post"  class="box" action="">
             <img src="./img/<?php echo $fetch_product['image'];?>" alt="">
             <div class="name"><?php echo $fetch_product['image'];?></div>
@@ -113,20 +149,96 @@ if(mysqli_num_rows($select_product) > 0){
             <input type="submit" value="add to cart" name="add_to_cart" class="btn">
         </form>
         <?php
-    };
-};
-
-
-   
- ?>
+         };
+        };
+       ?>
  
+     </div>
+
+  
+   </div>
+
+<div class="shopping-cart">
+    <h1 class="heading">shopping cart</h1>
+    
+    <table>
+        <thead>
+            <th>image</th>
+            <th>name</th>
+            <th>price</th>
+            <th>quantity</th>
+            <th>total price</th>
+            <th>action</th>
+        </thead>
+        
+        <tbody>
+
+        <?php
+
+        $grand_total = 0;
+          $cart_query = mysqli_query($conn, "SELECT * FROM `cart` WHERE user_id = '$user_id'") or die('query failed');
+        
+          if(mysqli_num_rows($select_product) > 0){
+        while($fetch_cart = mysqli_fetch_assoc($cart_query)){
+          ?>
+
+           <tr>
+            <td><img src="img/<?php echo $fetch_cart['image'];?>"  height="100"  alt=""></td>
+            <td><?php echo $fetch_cart['name'];?></td>
+            <td><?php echo $fetch_cart['price'];?>/-</td>
+            <td>
+                <form action="" method="post">
+                    <input type="hidden" name="cart_id" value="<?php echo $fetch_cart['id'];?>">
+                    <input type="number" min="1" name="cart_quantity" value="<?php echo
+                    $fetch_cart['quantity'];?>">
+                    <input type="submit" name="update_cart" value="update" class="option-btn">
+                </form>
+            </td>
+            <?php $sub_total = number_format($fetch_cart['price']) * $fetch_cart['quantity'];?>
+            <td>$<?php echo $sub_total?>/-</td>
+            <td><a href="index.php?remove=<?php echo $fetch_cart['id'];?>"
+           class="delete-btn" onclick="return confirm('remove item from cart?');">remove</a></td>
+           </tr>
+
+          <?php
+            $grand_total += $sub_total;
+               };
+
+            }
+            else{
+          
+
+               echo '<tr><td style="padding:20px;text-transform:capitalize;"colspan="6">no item added</td></tr>';
+            }
+          ?>    
+          <tr class="table-bottom">
+
+          <td colspan="4">grand total:</td>
+          <td>$<?php echo $grand_total; ?>/-</td> 
+
+        <td><a href="index.php?delete_all" onclick="return confirm('delete all from cart?')
+        ;"class="delete-btn">delete all</a></td> 
+
+
+
+          </tr>
+        </tbody>
+    </table>
+
+<div class="cart-btn">
+  <a href="#" class="btn <?php echo ($grand_total > 1)?'':'disabled'; ?>">proceed to checkout</a>
+
+</div>
+
 
 
 </div>
 
 </div>
 
-</div>
+
+
+
 
 
 </body>
